@@ -10,6 +10,5 @@
       }
     ]
     // "no-param-reassign": off,
-    // "no-underscore-dangle": "error", allow: 0
   }
 }
