@@ -16,7 +16,7 @@ module.exports.createCard = async (req, res) => {
   try {
     const card = await Card.create({
       name, link, owner: req.user._id, likes, createdAt,
-    }, { runValidators: true });
+    });
     res.status(200).send(card);
   } catch (err) {
     if (err.errors.name.name === 'ValidatorError') {
