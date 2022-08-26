@@ -28,7 +28,7 @@ module.exports.createUser = async (req, res) => {
     const user = await User.create({ name, about, avatar });
     res.status(200).send(user);
   } catch (err) {
-    if (err.errors.name === 'ValidationError') {
+    if (err.errors.name === 'ValidatorError') {
       res.status(400).send({ message: 'Переданы некорректные данные' });
     }
     res.status(500).send({ message: 'Произошла ошибка на сервере' });
@@ -38,29 +38,33 @@ module.exports.createUser = async (req, res) => {
 module.exports.updateUser = async (req, res) => {
   const { name, about } = req.body;
   try {
-    const user = await User.findByIdAndUpdate(req.user._id, { name, about });
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { name, about },
+      { runValidators: true },
+    );
     if (!user) {
       res.status(404).send({ message: 'Такого пользователся не существует' });
     }
     res.status(200).send(user);
   } catch (err) {
-    if (err.errors.name === 'ValidationError') {
+    if (err.errors.name === 'ValidatorError') {
       res.status(400).send({ message: 'Переданы некорректные данные' });
     }
-    res.status(500).send({ message: 'Произошла ошибка на сервере' });
+    res.status(500).send({ message: err.errors.name });
   }
 };
 
 module.exports.updateUserAvatar = async (req, res) => {
   const { avatar } = req.body;
   try {
-    const user = await User.findByIdAndUpdate(req.user._id, { avatar });
+    const user = await User.findByIdAndUpdate(req.user._id, { avatar }, { runValidators: true });
     if (!user) {
       res.status(404).send({ message: 'Такого пользователся не существует' });
     }
     res.status(200).send(user);
   } catch (err) {
-    if (err.errors.name === 'ValidationError') {
+    if (err.errors.name === 'ValidatorError') {
       res.status(400).send({ message: 'Переданы некорректные данные' });
     }
     res.status(500).send({ message: 'Произошла ошибка на сервере' });

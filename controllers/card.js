@@ -19,7 +19,7 @@ module.exports.createCard = async (req, res) => {
     });
     res.status(200).send(card);
   } catch (err) {
-    if (err.errors.name === 'ValidationError') {
+    if (err.errors.name === 'ValidatorError') {
       res.status(400).send({ message: 'Переданы некорректные данные' });
     }
     res.status(500).send({ message: 'Произошла ошибка на сервере' });
@@ -50,7 +50,7 @@ module.exports.putLikeCard = async (req, res) => {
     }
     res.status(200).send(card);
   } catch (err) {
-    if (err.errors.name === 'ValidationError') {
+    if (err.errors.name === 'ValidatorError') {
       res.status(400).send({ message: 'Переданы некорректные данные' });
     }
     res.status(500).send({ message: 'Произошла ошибка на сервере' });
@@ -69,7 +69,7 @@ module.exports.deleteLikeCard = async (req, res) => {
     }
     res.status(200).send(card);
   } catch (err) {
-    if (err.errors.name === 'ValidationError') {
+    if (err.errors.name === 'ValidatorError') {
       res.status(400).send({ message: 'Переданы некорректные данные' });
     }
     res.status(500).send({ message: 'Произошла ошибка на сервере' });
