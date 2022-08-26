@@ -28,7 +28,7 @@ module.exports.createUser = async (req, res) => {
     const user = await User.create({ name, about, avatar });
     res.status(200).send(user);
   } catch (err) {
-    if (err.errors.name.name === 'ValidatorError') {
+    if (err.errors.name === 'ValidatorError') {
       res.status(400).send({ message: 'Переданы некорректные данные' });
     }
     res.status(500).send({ message: 'Произошла ошибка на сервере' });
