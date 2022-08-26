@@ -25,10 +25,10 @@ module.exports.getUser = async (req, res) => {
 module.exports.createUser = async (req, res) => {
   const { name, about, avatar } = req.body;
   try {
-    const user = await User.create({ name, about, avatar });
+    const user = await User.create({ name, about, avatar }, { runValidators: true });
     res.status(200).send(user);
   } catch (err) {
-    if (err.errors.name === 'ValidatorError') {
+    if (err.errors.name.name === 'ValidatorError') {
       res.status(400).send({ message: 'Переданы некорректные данные' });
     }
     res.status(500).send({ message: 'Произошла ошибка на сервере' });
@@ -48,10 +48,10 @@ module.exports.updateUser = async (req, res) => {
     }
     res.status(200).send(user);
   } catch (err) {
-    if (err.errors.name === 'ValidatorError') {
+    if (err.errors.name.name === 'ValidatorError') {
       res.status(400).send({ message: 'Переданы некорректные данные' });
     }
-    res.status(500).send({ message: err.errors.name });
+    res.status(500).send({ message: 'Произошла ошибка на сервере' });
   }
 };
 
@@ -64,7 +64,7 @@ module.exports.updateUserAvatar = async (req, res) => {
     }
     res.status(200).send(user);
   } catch (err) {
-    if (err.errors.name === 'ValidatorError') {
+    if (err.errors.name.name === 'ValidatorError') {
       res.status(400).send({ message: 'Переданы некорректные данные' });
     }
     res.status(500).send({ message: 'Произошла ошибка на сервере' });
