@@ -1,20 +1,77 @@
 const Card = require('../models/card');
 
-module.exports.getCards = (req, res) => {
-  Card.find({})
-    .populate('card')
-    .then((cards) => res.send({ data: cards }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+module.exports.getCards = async (req, res) => {
+  try {
+    const card = await Card.find({});
+    res.status(200).send(card);
+  } catch (err) {
+    res.status(500).send({ message: 'Произошла ошибка на сервере' });
+  }
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = async (req, res) => {
   const {
-    name, link, ownerId, likes, createdAt,
+    name, link, likes, createdAt,
   } = req.body;
+  try {
+    const card = await Card.create({
+      name, link, owner: req.user._id, likes, createdAt,
+    });
+    res.status(200).send(card);
+  } catch (err) {
+    if (err.errors.name === 'ValidationError') {
+      res.status(400).send({ message: 'Переданы некорректные данные' });
+    }
+    res.status(500).send({ message: 'Произошла ошибка на сервере' });
+  }
+};
 
-  Card.create({
-    name, link, owner: ownerId, likes, createdAt,
-  })
-    .then((user) => res.send({ data: user }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+module.exports.deleteCard = async (req, res) => {
+  const { cardId } = req.params;
+  try {
+    const card = await Card.findByIdAndRemove(cardId);
+    if (!card) {
+      res.status(404).send({ message: 'Такой карточки не существует' });
+    }
+  } catch (err) {
+    res.status(500).send({ message: 'Произошла ошибка на сервере' });
+  }
+};
+
+module.exports.putLikeCard = async (req, res) => {
+  try {
+    const card = await Card.findByIdAndUpdate(
+      req.params.cardId,
+      { $addToSet: { likes: req.user._id } },
+      { new: true },
+    );
+    if (!card) {
+      res.status(404).send({ message: 'Такой карточки не существует' });
+    }
+    res.status(200).send(card);
+  } catch (err) {
+    if (err.errors.name === 'ValidationError') {
+      res.status(400).send({ message: 'Переданы некорректные данные' });
+    }
+    res.status(500).send({ message: 'Произошла ошибка на сервере' });
+  }
+};
+
+module.exports.deleteLikeCard = async (req, res) => {
+  try {
+    const card = await Card.findByIdAndUpdate(
+      req.params.cardId,
+      { $pull: { likes: req.user._id } },
+      { new: true },
+    );
+    if (!card) {
+      res.status(404).send({ message: 'Такой карточки не существует' });
+    }
+    res.status(200).send(card);
+  } catch (err) {
+    if (err.errors.name === 'ValidationError') {
+      res.status(400).send({ message: 'Переданы некорректные данные' });
+    }
+    res.status(500).send({ message: 'Произошла ошибка на сервере' });
+  }
 };
