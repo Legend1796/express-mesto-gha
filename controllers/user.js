@@ -25,7 +25,7 @@ module.exports.getUser = async (req, res) => {
 module.exports.createUser = async (req, res) => {
   const { name, about, avatar } = req.body;
   try {
-    const user = await User.create({ name, about, avatar }, { runValidators: true });
+    const user = await User.create({ name, about, avatar });
     res.status(200).send(user);
   } catch (err) {
     if (err.errors.name.name === 'ValidatorError') {
