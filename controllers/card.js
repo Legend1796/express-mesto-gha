@@ -38,6 +38,7 @@ module.exports.deleteCard = async (req, res) => {
     if (!card) {
       res.status(ERROR_NOTFOUND).send({ message: 'Такой карточки не существует' });
     }
+    res.send(card);
   } catch (err) {
     if (err.name === 'CastError') {
       res.status(ERROR_BADREQUEST).send({ message: 'Невалидный id ' });
