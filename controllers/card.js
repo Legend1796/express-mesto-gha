@@ -52,8 +52,7 @@ module.exports.putLikeCard = async (req, res) => {
     const card = await Card.findByIdAndUpdate(
       req.params.cardId,
       { $addToSet: { likes: req.user._id } },
-      { new: true },
-      { runValidators: true },
+      { new: true, runValidators: true },
     );
     if (!card) {
       res.status(ERROR_NOTFOUND).send({ message: 'Такой карточки не существует' });
@@ -73,8 +72,7 @@ module.exports.deleteLikeCard = async (req, res) => {
     const card = await Card.findByIdAndUpdate(
       req.params.cardId,
       { $pull: { likes: req.user._id } },
-      { new: true },
-      { runValidators: true },
+      { new: true, runValidators: true },
     );
     if (!card) {
       res.status(ERROR_NOTFOUND).send({ message: 'Такой карточки не существует' });
