@@ -1,11 +1,15 @@
 const Card = require('../models/card');
 
+const ERROR_BADREQUEST = 400;
+const ERROR_NOTFOUND = 404;
+const ERROR_SERVER = 500;
+
 module.exports.getCards = async (req, res) => {
   try {
     const card = await Card.find({});
-    res.status(200).send(card);
+    res.send(card);
   } catch (err) {
-    res.status(500).send({ message: 'Произошла ошибка на сервере' });
+    res.status(ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' });
   }
 };
 
@@ -17,12 +21,13 @@ module.exports.createCard = async (req, res) => {
     const card = await Card.create({
       name, link, owner: req.user._id, likes, createdAt,
     });
-    res.status(200).send(card);
+    res.send(card);
   } catch (err) {
-    if (err.errors.name.name === 'ValidatorError') {
-      res.status(400).send({ message: 'Переданы некорректные данные' });
+    if (err.name === 'ValidatorError') {
+      res.status(ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
+    } else {
+      res.status(ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' });
     }
-    res.status(500).send({ message: 'Произошла ошибка на сервере' });
   }
 };
 
@@ -31,10 +36,14 @@ module.exports.deleteCard = async (req, res) => {
   try {
     const card = await Card.findByIdAndRemove(cardId);
     if (!card) {
-      res.status(404).send({ message: 'Такой карточки не существует' });
+      res.status(ERROR_NOTFOUND).send({ message: 'Такой карточки не существует' });
     }
   } catch (err) {
-    res.status(500).send({ message: 'Произошла ошибка на сервере' });
+    if (err.name === 'CastError') {
+      res.status(ERROR_BADREQUEST).send({ message: 'Невалидный id ' });
+    } else {
+      res.status(ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' });
+    }
   }
 };
 
@@ -47,14 +56,15 @@ module.exports.putLikeCard = async (req, res) => {
       { runValidators: true },
     );
     if (!card) {
-      res.status(404).send({ message: 'Такой карточки не существует' });
+      res.status(ERROR_NOTFOUND).send({ message: 'Такой карточки не существует' });
     }
-    res.status(200).send(card);
+    res.send(card);
   } catch (err) {
-    if (err.errors.name.name === 'ValidatorError') {
-      res.status(400).send({ message: 'Переданы некорректные данные' });
+    if (err.name === 'CastError') {
+      res.status(ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
+    } else {
+      res.status(ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' });
     }
-    res.status(500).send({ message: 'Произошла ошибка на сервере' });
   }
 };
 
@@ -67,13 +77,14 @@ module.exports.deleteLikeCard = async (req, res) => {
       { runValidators: true },
     );
     if (!card) {
-      res.status(404).send({ message: 'Такой карточки не существует' });
+      res.status(ERROR_NOTFOUND).send({ message: 'Такой карточки не существует' });
     }
-    res.status(200).send(card);
+    res.send(card);
   } catch (err) {
-    if (err.errors.name.name === 'ValidatorError') {
-      res.status(400).send({ message: 'Переданы некорректные данные' });
+    if (err.name === 'CastError') {
+      res.status(ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
+    } else {
+      res.status(ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' });
     }
-    res.status(500).send({ message: 'Произошла ошибка на сервере' });
   }
 };
