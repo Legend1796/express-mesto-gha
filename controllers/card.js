@@ -23,7 +23,7 @@ module.exports.createCard = async (req, res) => {
     });
     res.send(card);
   } catch (err) {
-    if (err.name === 'ValidatorError') {
+    if (err.name === 'ValidationError') {
       res.status(ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
     } else {
       res.status(ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' });

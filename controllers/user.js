@@ -59,7 +59,6 @@ module.exports.updateUser = async (req, res) => {
       res.send(user);
     }
   } catch (err) {
-    res.send(err);
     if (err.name === 'ValidationError') {
       res.status(ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
     } else {
