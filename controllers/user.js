@@ -1,15 +1,12 @@
 const User = require('../models/user');
-
-const ERROR_BADREQUEST = 400;
-const ERROR_NOTFOUND = 404;
-const ERROR_SERVER = 500;
+const error = require('../utils/errors');
 
 module.exports.getUsers = async (req, res) => {
   try {
     const users = await User.find({});
     res.send(users);
   } catch (err) {
-    res.status(ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' });
+    res.status(error.ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' });
   }
 };
 
@@ -18,15 +15,15 @@ module.exports.getUser = async (req, res) => {
   try {
     const user = await User.findById(userId);
     if (!user) {
-      res.status(ERROR_NOTFOUND).send({ message: 'Такого пользователся не существует' });
+      res.status(error.ERROR_NOTFOUND).send({ message: 'Такого пользователся не существует' });
     } else {
       res.send(user);
     }
   } catch (err) {
     if (err.name === 'CastError') {
-      res.status(ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
+      res.status(error.ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
     } else {
-      res.status(ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' });
+      res.status(error.ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' });
     }
   }
 };
@@ -38,9 +35,9 @@ module.exports.createUser = async (req, res) => {
     res.send(user);
   } catch (err) {
     if (err.name === 'ValidationError') {
-      res.status(ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
+      res.status(error.ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
     } else {
-      res.status(ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' });
+      res.status(error.ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' });
     }
   }
 };
@@ -54,15 +51,15 @@ module.exports.updateUser = async (req, res) => {
       { new: true, runValidators: true },
     );
     if (!user) {
-      res.status(ERROR_NOTFOUND).send({ message: 'Такого пользователся не существует' });
+      res.status(error.ERROR_NOTFOUND).send({ message: 'Такого пользователся не существует' });
     } else {
       res.send(user);
     }
   } catch (err) {
     if (err.name === 'ValidationError') {
-      res.status(ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
+      res.status(error.ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
     } else {
-      res.status(ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' });
+      res.status(error.ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' });
     }
   }
 };
@@ -76,15 +73,15 @@ module.exports.updateUserAvatar = async (req, res) => {
       { new: true, runValidators: true },
     );
     if (!user) {
-      res.status(ERROR_NOTFOUND).send({ message: 'Такого пользователся не существует' });
+      res.status(error.ERROR_NOTFOUND).send({ message: 'Такого пользователся не существует' });
     } else {
       res.send(user);
     }
   } catch (err) {
     if (err.errors.name.name === 'ValidatorError') {
-      res.status(ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
+      res.status(error.ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
     } else {
-      res.status(ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' });
+      res.status(error.ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' });
     }
   }
 };
