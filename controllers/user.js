@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const error = require('../utils/errors');
 
@@ -18,7 +19,9 @@ module.exports.getUser = async (req, res) => {
     if (!user) {
       res.status(error.ERROR_NOTFOUND).send({ message: 'Такого пользователся не существует' });
     } else {
-      res.send(user);
+      res.send({
+        _id: user._id, name: user.name, about: user.about, avatar: user.avatar, email: user.email,
+      });
     }
   } catch (err) {
     if (err.name === 'CastError') {
@@ -61,7 +64,9 @@ module.exports.updateUser = async (req, res) => {
     if (!user) {
       res.status(error.ERROR_NOTFOUND).send({ message: 'Такого пользователся не существует' });
     } else {
-      res.send(user);
+      res.send({
+        _id: user._id, name: user.name, about: user.about, avatar: user.avatar, email: user.email,
+      });
     }
   } catch (err) {
     if (err.name === 'ValidationError') {
@@ -95,14 +100,19 @@ module.exports.updateUserAvatar = async (req, res) => {
 };
 
 module.exports.login = async (req, res) => {
-  const { email, password } = req.params;
+  const { email, password } = req.body;
   try {
-    const user = await User.findOne(email);
-    if (!email) {
+    const user = await User.findOne({ email });
+    if (!user) {
       res.status(error.ERROR_UNAUTORIZED).send({ message: 'Неправильные почта или пароль' });
     } else {
-      bcrypt.compare(password, user.password);
-      res.send(user);
+      const isUserValid = await bcrypt.compare(password, user.password);
+      if (isUserValid) {
+        const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+        res.cookie('jwt', token, { maxAge: 3600000 * 24 * 7, httpOnly: true }).end();
+      } else {
+        res.status(error.ERROR_UNAUTORIZED).send({ message: 'Неправильные почта или пароль' });
+      }
     }
   } catch (err) {
     if (err.name === 'CastError') {
