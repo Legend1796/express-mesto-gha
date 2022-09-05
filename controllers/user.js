@@ -3,6 +3,8 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const error = require('../utils/errors');
 
+const { JWT_SECRET } = process.env;
+
 module.exports.getUsers = async (req, res) => {
   try {
     const users = await User.find({});
@@ -102,14 +104,14 @@ module.exports.updateUserAvatar = async (req, res) => {
 module.exports.login = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select('+password');
     if (!user) {
       res.status(error.ERROR_UNAUTORIZED).send({ message: 'Неправильные почта или пароль' });
     } else {
       const isUserValid = await bcrypt.compare(password, user.password);
       if (isUserValid) {
-        const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
-        res.cookie('jwt', token, { maxAge: 3600000 * 24 * 7, httpOnly: true }).end();
+        const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
+        res.cookie('jwt', token, { maxAge: 3600000 * 24 * 7, httpOnly: true, sameSite: true }).end();
       } else {
         res.status(error.ERROR_UNAUTORIZED).send({ message: 'Неправильные почта или пароль' });
       }
