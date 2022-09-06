@@ -17,13 +17,9 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
-    //     validate: {
-    //       validator: f(v) {
-    //   return /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?#?$/.test(v);
-    // },
-    //   message: 'Неправильный формат ссылки',
-    //     },
-    // required: [true, 'User phone number required'],
+    validate: {
+      validator: (v) => (/^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?#?$/).test(v),
+    },
   },
   email: {
     type: String,

@@ -17,7 +17,7 @@ app.use(express.json());
 app.post('/signin', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
-    password: Joi.string().min(8),
+    password: Joi.string().required().min(8),
   }),
 }), login);
 app.post('/signup', celebrate({
@@ -26,7 +26,7 @@ app.post('/signup', celebrate({
     about: Joi.string().min(2).max(30),
     avatar: Joi.string().min(10).pattern(/^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?#?$/),
     email: Joi.string().required().email(),
-    password: Joi.string().min(8),
+    password: Joi.string().required().min(8),
   }),
 }), createUser);
 app.use(cookieParser());

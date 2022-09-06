@@ -46,14 +46,23 @@ module.exports.createUser = async (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
+
   try {
-    const hash = await bcrypt.hash(password, 10);
-    const user = await User.create({
-      name, about, avatar, email, password: hash,
-    });
-    res.send({
-      _id: user._id, name: user.name, about: user.about, avatar: user.avatar, email: user.email,
-    });
+    const userEmail = await User.findOne({ email });
+    if (!userEmail) {
+      const hash = await bcrypt.hash(password, 10);
+      const user = await User.create({
+        name, about, avatar, email, password: hash,
+      });
+      res.send(user);
+    } else {
+      const errServer = new Error('Пользователь с такой электронной почтой уже зарегистрирован');
+      errServer.statusCode = error.ERROR_CONFLICT;
+      next(errServer);
+    }
+    // res.send({
+    //   _id: user._id, name: user.name, about: user.about, avatar: user.avatar, email: user.email,
+    // });
   } catch (err) {
     if (err.name === 'ValidationError') {
       const errValidationError = new Error('Переданы некорректные данные');
@@ -139,7 +148,8 @@ module.exports.login = async (req, res, next) => {
       const isUserValid = await bcrypt.compare(password, user.password);
       if (isUserValid) {
         const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
-        res.cookie('jwt', token, { maxAge: 3600000 * 24 * 7, httpOnly: true, sameSite: true }).end();
+        res.cookie('jwt', token, { maxAge: 3600000 * 24 * 7, httpOnly: true, sameSite: true });
+        res.send({ token });
       } else {
         const errAutorization = new Error('Неправильные почта или пароль');
         errAutorization.statusCode = error.ERROR_UNAUTORIZED;
