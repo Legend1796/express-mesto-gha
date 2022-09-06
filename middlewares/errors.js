@@ -1,4 +1,4 @@
 module.exports.errorHendler = (err, req, res, next) => {
-  res.send(err);
+  res.status(err.statusCode).send({ message: err.message });
   next();
 };

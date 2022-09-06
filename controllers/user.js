@@ -5,21 +5,25 @@ const error = require('../utils/errors');
 
 const { JWT_SECRET } = process.env;
 
-module.exports.getUsers = async (req, res) => {
+module.exports.getUsers = async (req, res, next) => {
   try {
     const users = await User.find({});
     res.send(users);
   } catch (err) {
-    res.status(error.ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' });
+    const errGetUsers = new Error('Произошла ошибка на сервере');
+    err.statusCode = error.ERROR_SERVER;
+    next(errGetUsers);
   }
 };
 
-module.exports.getUser = async (req, res) => {
+module.exports.getUser = async (req, res, next) => {
   const { userId } = req.params;
   try {
     const user = await User.findById(userId);
     if (!user) {
-      res.status(error.ERROR_NOTFOUND).send({ message: 'Такого пользователся не существует' });
+      const errGetUser = new Error('Такого пользователся не существует');
+      errGetUser.statusCode = error.ERROR_NOTFOUND;
+      next(errGetUser);
     } else {
       res.send({
         _id: user._id, name: user.name, about: user.about, avatar: user.avatar, email: user.email,
@@ -29,12 +33,14 @@ module.exports.getUser = async (req, res) => {
     if (err.name === 'CastError') {
       res.status(error.ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
     } else {
-      res.status(error.ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' });
+      const errGetUsers = new Error('Произошла ошибка на сервере');
+      err.statusCode = error.ERROR_SERVER;
+      next(errGetUsers);
     }
   }
 };
 
-module.exports.createUser = async (req, res) => {
+module.exports.createUser = async (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -50,12 +56,14 @@ module.exports.createUser = async (req, res) => {
     if (err.name === 'ValidationError') {
       res.status(error.ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
     } else {
-      res.status(error.ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' });
+      const errGetUsers = new Error('Произошла ошибка на сервере');
+      err.statusCode = error.ERROR_SERVER;
+      next(errGetUsers);
     }
   }
 };
 
-module.exports.updateUser = async (req, res) => {
+module.exports.updateUser = async (req, res, next) => {
   const { name, about } = req.body;
   const userId = req.user._id;
   try {
@@ -75,12 +83,14 @@ module.exports.updateUser = async (req, res) => {
     if (err.name === 'ValidationError') {
       res.status(error.ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
     } else {
-      res.status(error.ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' });
+      const errGetUsers = new Error('Произошла ошибка на сервере');
+      err.statusCode = error.ERROR_SERVER;
+      next(errGetUsers);
     }
   }
 };
 
-module.exports.updateUserAvatar = async (req, res) => {
+module.exports.updateUserAvatar = async (req, res, next) => {
   const userId = req.user._id;
   const { avatar } = req.body;
   try {
@@ -98,12 +108,14 @@ module.exports.updateUserAvatar = async (req, res) => {
     if (err.errors.name.name === 'ValidatorError') {
       res.status(error.ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
     } else {
-      res.status(error.ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' });
+      const errGetUsers = new Error('Произошла ошибка на сервере');
+      err.statusCode = error.ERROR_SERVER;
+      next(errGetUsers);
     }
   }
 };
 
-module.exports.login = async (req, res) => {
+module.exports.login = async (req, res, next) => {
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email }).select('+password');
@@ -122,12 +134,14 @@ module.exports.login = async (req, res) => {
     if (err.name === 'CastError') {
       res.status(error.ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
     } else {
-      res.status(error.ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' });
+      const errGetUsers = new Error('Произошла ошибка на сервере');
+      err.statusCode = error.ERROR_SERVER;
+      next(errGetUsers);
     }
   }
 };
 
-module.exports.getUserMe = async (req, res) => {
+module.exports.getUserMe = async (req, res, next) => {
   const userId = req.user._id;
   try {
     const user = await User.findById(userId);
@@ -142,7 +156,9 @@ module.exports.getUserMe = async (req, res) => {
     if (err.name === 'CastError') {
       res.status(error.ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
     } else {
-      res.status(error.ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' });
+      const errGetUsers = new Error('Произошла ошибка на сервере');
+      err.statusCode = error.ERROR_SERVER;
+      next(errGetUsers);
     }
   }
 };
