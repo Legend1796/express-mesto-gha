@@ -57,9 +57,10 @@ module.exports.createUser = async (req, res) => {
 
 module.exports.updateUser = async (req, res) => {
   const { name, about } = req.body;
+  const userId = req.user._id;
   try {
     const user = await User.findByIdAndUpdate(
-      req.user._id,
+      userId,
       { name, about },
       { new: true, runValidators: true },
     );
@@ -80,10 +81,11 @@ module.exports.updateUser = async (req, res) => {
 };
 
 module.exports.updateUserAvatar = async (req, res) => {
+  const userId = req.user._id;
   const { avatar } = req.body;
   try {
     const user = await User.findByIdAndUpdate(
-      req.user._id,
+      userId,
       { avatar },
       { new: true, runValidators: true },
     );
@@ -115,6 +117,26 @@ module.exports.login = async (req, res) => {
       } else {
         res.status(error.ERROR_UNAUTORIZED).send({ message: 'Неправильные почта или пароль' });
       }
+    }
+  } catch (err) {
+    if (err.name === 'CastError') {
+      res.status(error.ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
+    } else {
+      res.status(error.ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' });
+    }
+  }
+};
+
+module.exports.getUserMe = async (req, res) => {
+  const userId = req.user._id;
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(error.ERROR_NOTFOUND).send({ message: 'Такого пользователся не существует' });
+    } else {
+      res.send({
+        _id: user._id, name: user.name, about: user.about, avatar: user.avatar, email: user.email,
+      });
     }
   } catch (err) {
     if (err.name === 'CastError') {
