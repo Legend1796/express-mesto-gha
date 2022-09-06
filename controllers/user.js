@@ -21,9 +21,9 @@ module.exports.getUser = async (req, res, next) => {
   try {
     const user = await User.findById(userId);
     if (!user) {
-      const errGetUser = new Error('Такого пользователся не существует');
-      errGetUser.statusCode = error.ERROR_NOTFOUND;
-      next(errGetUser);
+      const errUserNotFound = new Error('Такого пользователся не существует');
+      errUserNotFound.statusCode = error.ERROR_NOTFOUND;
+      next(errUserNotFound);
     } else {
       res.send({
         _id: user._id, name: user.name, about: user.about, avatar: user.avatar, email: user.email,
@@ -31,11 +31,13 @@ module.exports.getUser = async (req, res, next) => {
     }
   } catch (err) {
     if (err.name === 'CastError') {
-      res.status(error.ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
+      const errCastError = new Error('Переданы некорректные данные');
+      err.statusCode = error.ERROR_BADREQUEST;
+      next(errCastError);
     } else {
-      const errGetUsers = new Error('Произошла ошибка на сервере');
+      const errGetUser = new Error('Произошла ошибка на сервере');
       err.statusCode = error.ERROR_SERVER;
-      next(errGetUsers);
+      next(errGetUser);
     }
   }
 };
@@ -54,7 +56,9 @@ module.exports.createUser = async (req, res, next) => {
     });
   } catch (err) {
     if (err.name === 'ValidationError') {
-      res.status(error.ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
+      const errValidationError = new Error('Переданы некорректные данные');
+      err.statusCode = error.ERROR_BADREQUEST;
+      next(errValidationError);
     } else {
       const errGetUsers = new Error('Произошла ошибка на сервере');
       err.statusCode = error.ERROR_SERVER;
@@ -73,7 +77,9 @@ module.exports.updateUser = async (req, res, next) => {
       { new: true, runValidators: true },
     );
     if (!user) {
-      res.status(error.ERROR_NOTFOUND).send({ message: 'Такого пользователся не существует' });
+      const errUserNotFound = new Error('Такого пользователся не существует');
+      errUserNotFound.statusCode = error.ERROR_NOTFOUND;
+      next(errUserNotFound);
     } else {
       res.send({
         _id: user._id, name: user.name, about: user.about, avatar: user.avatar, email: user.email,
@@ -81,7 +87,9 @@ module.exports.updateUser = async (req, res, next) => {
     }
   } catch (err) {
     if (err.name === 'ValidationError') {
-      res.status(error.ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
+      const errValidationError = new Error('Переданы некорректные данные');
+      err.statusCode = error.ERROR_BADREQUEST;
+      next(errValidationError);
     } else {
       const errGetUsers = new Error('Произошла ошибка на сервере');
       err.statusCode = error.ERROR_SERVER;
@@ -100,13 +108,17 @@ module.exports.updateUserAvatar = async (req, res, next) => {
       { new: true, runValidators: true },
     );
     if (!user) {
-      res.status(error.ERROR_NOTFOUND).send({ message: 'Такого пользователся не существует' });
+      const errUserNotFound = new Error('Такого пользователся не существует');
+      errUserNotFound.statusCode = error.ERROR_NOTFOUND;
+      next(errUserNotFound);
     } else {
       res.send(user);
     }
   } catch (err) {
     if (err.errors.name.name === 'ValidatorError') {
-      res.status(error.ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
+      const errValidationError = new Error('Переданы некорректные данные');
+      err.statusCode = error.ERROR_BADREQUEST;
+      next(errValidationError);
     } else {
       const errGetUsers = new Error('Произошла ошибка на сервере');
       err.statusCode = error.ERROR_SERVER;
@@ -120,19 +132,25 @@ module.exports.login = async (req, res, next) => {
   try {
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
-      res.status(error.ERROR_UNAUTORIZED).send({ message: 'Неправильные почта или пароль' });
+      const errAutorization = new Error('Неправильные почта или пароль');
+      errAutorization.statusCode = error.ERROR_UNAUTORIZED;
+      next(errAutorization);
     } else {
       const isUserValid = await bcrypt.compare(password, user.password);
       if (isUserValid) {
         const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
         res.cookie('jwt', token, { maxAge: 3600000 * 24 * 7, httpOnly: true, sameSite: true }).end();
       } else {
-        res.status(error.ERROR_UNAUTORIZED).send({ message: 'Неправильные почта или пароль' });
+        const errAutorization = new Error('Неправильные почта или пароль');
+        errAutorization.statusCode = error.ERROR_UNAUTORIZED;
+        next(errAutorization);
       }
     }
   } catch (err) {
     if (err.name === 'CastError') {
-      res.status(error.ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
+      const errCastError = new Error('Переданы некорректные данные');
+      err.statusCode = error.ERROR_BADREQUEST;
+      next(errCastError);
     } else {
       const errGetUsers = new Error('Произошла ошибка на сервере');
       err.statusCode = error.ERROR_SERVER;
@@ -146,7 +164,9 @@ module.exports.getUserMe = async (req, res, next) => {
   try {
     const user = await User.findById(userId);
     if (!user) {
-      res.status(error.ERROR_NOTFOUND).send({ message: 'Такого пользователся не существует' });
+      const errUserNotFound = new Error('Такого пользователся не существует');
+      errUserNotFound.statusCode = error.ERROR_NOTFOUND;
+      next(errUserNotFound);
     } else {
       res.send({
         _id: user._id, name: user.name, about: user.about, avatar: user.avatar, email: user.email,
@@ -154,7 +174,9 @@ module.exports.getUserMe = async (req, res, next) => {
     }
   } catch (err) {
     if (err.name === 'CastError') {
-      res.status(error.ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
+      const errCastError = new Error('Переданы некорректные данные');
+      err.statusCode = error.ERROR_BADREQUEST;
+      next(errCastError);
     } else {
       const errGetUsers = new Error('Произошла ошибка на сервере');
       err.statusCode = error.ERROR_SERVER;

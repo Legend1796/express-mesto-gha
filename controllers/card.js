@@ -6,9 +6,9 @@ module.exports.getCards = async (req, res, next) => {
     const card = await Card.find({});
     res.send(card);
   } catch (err) {
-    const errGetUsers = new Error('Произошла ошибка на сервере');
+    const errServer = new Error('Произошла ошибка на сервере');
     err.statusCode = error.ERROR_SERVER;
-    next(errGetUsers);
+    next(errServer);
   }
 };
 
@@ -23,11 +23,13 @@ module.exports.createCard = async (req, res, next) => {
     res.send(card);
   } catch (err) {
     if (err.name === 'ValidationError') {
-      res.status(error.ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
+      const errValidationError = new Error('Переданы некорректные данные');
+      err.statusCode = error.ERROR_BADREQUEST;
+      next(errValidationError);
     } else {
-      const errGetUsers = new Error('Произошла ошибка на сервере');
+      const errServer = new Error('Произошла ошибка на сервере');
       err.statusCode = error.ERROR_SERVER;
-      next(errGetUsers);
+      next(errServer);
     }
   }
 };
@@ -37,19 +39,25 @@ module.exports.deleteCard = async (req, res, next) => {
   try {
     const card = await Card.findByIdAndRemove(cardId);
     if (!card) {
-      res.status(error.ERROR_NOTFOUND).send({ message: 'Такой карточки не существует' });
+      const errGetCard = new Error('Такой карточки не существует');
+      errGetCard.statusCode = error.ERROR_NOTFOUND;
+      next(errGetCard);
     } else if (card.owner !== req.user._id) {
-      res.status(error.ERROR_SERVER).send({ message: 'У вас нет прав на удаление этой карточки' });
+      const errServer = new Error('У вас нет прав на удаление этой карточки');
+      errServer.statusCode = error.ERROR_SERVER;
+      next(errServer);
     } else {
       res.send(card);
     }
   } catch (err) {
     if (err.name === 'CastError') {
-      res.status(error.ERROR_BADREQUEST).send({ message: 'Невалидный id ' });
+      const errCastError = new Error('Переданы некорректные данные');
+      err.statusCode = error.ERROR_BADREQUEST;
+      next(errCastError);
     } else {
-      const errGetUsers = new Error('Произошла ошибка на сервере');
+      const errServer = new Error('Произошла ошибка на сервере');
       err.statusCode = error.ERROR_SERVER;
-      next(errGetUsers);
+      next(errServer);
     }
   }
 };
@@ -62,17 +70,21 @@ module.exports.putLikeCard = async (req, res, next) => {
       { new: true, runValidators: true },
     );
     if (!card) {
-      res.status(error.ERROR_NOTFOUND).send({ message: 'Такой карточки не существует' });
+      const errGetCard = new Error('Такой карточки не существует');
+      errGetCard.statusCode = error.ERROR_NOTFOUND;
+      next(errGetCard);
     } else {
       res.send(card);
     }
   } catch (err) {
     if (err.name === 'CastError') {
-      res.status(error.ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
+      const errCastError = new Error('Переданы некорректные данные');
+      err.statusCode = error.ERROR_BADREQUEST;
+      next(errCastError);
     } else {
-      const errGetUsers = new Error('Произошла ошибка на сервере');
+      const errServer = new Error('Произошла ошибка на сервере');
       err.statusCode = error.ERROR_SERVER;
-      next(errGetUsers);
+      next(errServer);
     }
   }
 };
@@ -85,17 +97,21 @@ module.exports.deleteLikeCard = async (req, res, next) => {
       { new: true, runValidators: true },
     );
     if (!card) {
-      res.status(error.ERROR_NOTFOUND).send({ message: 'Такой карточки не существует' });
+      const errGetCard = new Error('Такой карточки не существует');
+      errGetCard.statusCode = error.ERROR_NOTFOUND;
+      next(errGetCard);
     } else {
       res.send(card);
     }
   } catch (err) {
     if (err.name === 'CastError') {
-      res.status(error.ERROR_BADREQUEST).send({ message: 'Переданы некорректные данные' });
+      const errCastError = new Error('Переданы некорректные данные');
+      err.statusCode = error.ERROR_BADREQUEST;
+      next(errCastError);
     } else {
-      const errGetUsers = new Error('Произошла ошибка на сервере');
+      const errServer = new Error('Произошла ошибка на сервере');
       err.statusCode = error.ERROR_SERVER;
-      next(errGetUsers);
+      next(errServer);
     }
   }
 };
