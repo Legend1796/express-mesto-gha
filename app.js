@@ -30,8 +30,9 @@ app.post('/signup', celebrate({
   }),
 }), createUser);
 app.use(cookieParser());
+app.use(auth);
 app.use(userRouters);
-app.use(auth, cardRouters);
+app.use(cardRouters);
 app.use((req, res) => {
   res.status(404).send({ message: 'Произошла ошибка' });
 });

@@ -148,7 +148,9 @@ module.exports.login = async (req, res, next) => {
       if (isUserValid) {
         const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
         res.cookie('jwt', token, { maxAge: 3600000 * 24 * 7, httpOnly: true, sameSite: true });
-        res.send({ token });
+        res.send({
+          _id: user._id, name: user.name, about: user.about, avatar: user.avatar, email: user.email,
+        });
       } else {
         const errAutorization = new Error('Неправильные почта или пароль');
         errAutorization.statusCode = error.ERROR_UNAUTORIZED;
