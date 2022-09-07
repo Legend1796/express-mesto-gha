@@ -10,7 +10,7 @@ const app = express();
 const { userRouters } = require('./routes/user');
 const { cardRouters } = require('./routes/card');
 const { login, createUser } = require('./controllers/user');
-// const { auth } = require('./middlewares/auth');
+const { auth } = require('./middlewares/auth');
 const { errorHendler } = require('./middlewares/errors');
 
 app.use(express.json());
@@ -30,7 +30,7 @@ app.post('/signup', celebrate({
   }),
 }), createUser);
 app.use(cookieParser());
-// app.use(auth);
+app.use(auth);
 app.use(userRouters);
 app.use(cardRouters);
 app.use((req, res) => {
