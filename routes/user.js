@@ -3,13 +3,12 @@ const { celebrate, Joi } = require('celebrate');
 const {
   getUsers, getUser, updateUser, updateUserAvatar, getUserMe,
 } = require('../controllers/user');
-const { auth } = require('../middlewares/auth');
 
 userRouters.get('/users', getUsers);
-userRouters.get('/users/me', auth, getUserMe);
+userRouters.get('/users/me', getUserMe);
 userRouters.get('/users/:userId', celebrate({
   body: Joi.object().keys({
-    _id: Joi.string().id(),
+    _id: Joi.string().pattern(/[\da-f]{24}/),
   }),
 }), getUser);
 userRouters.patch('/users/me', celebrate({
@@ -20,7 +19,7 @@ userRouters.patch('/users/me', celebrate({
 }), updateUser);
 userRouters.patch('/users/me/avatar', celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().min(2).max(30),
+    avatar: Joi.string().min(8).pattern(/^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?#?$/),
   }),
 }), updateUserAvatar);
 

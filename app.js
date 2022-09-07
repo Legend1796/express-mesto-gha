@@ -38,11 +38,19 @@ app.use((req, res) => {
 app.use(errors());
 app.use(errorHendler);
 
-mongoose.connect('mongodb://localhost:27017/mestodb', {
-  useNewUrlParser: true,
-  useUnifiedTopology: false,
-});
+async function main() {
+  try {
+    await mongoose.connect('mongodb://localhost:27017/mestodb', {
+      useNewUrlParser: true,
+      useUnifiedTopology: false,
+    });
 
-app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}`);
-});
+    await app.listen(PORT, () => {
+      console.log(`App listening on port ${PORT}`);
+    });
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+main();
