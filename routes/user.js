@@ -15,7 +15,7 @@ userRouters.patch('/users/me', celebrate({
 }), updateUser);
 userRouters.patch('/users/me/avatar', celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().min(6).max(30),
+    avatar: Joi.string().min(2).max(30),
   }),
 }), updateUserAvatar);
 

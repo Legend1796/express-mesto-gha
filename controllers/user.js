@@ -54,15 +54,14 @@ module.exports.createUser = async (req, res, next) => {
       const user = await User.create({
         name, about, avatar, email, password: hash,
       });
-      res.send(user);
+      res.send({
+        _id: user._id, name: user.name, about: user.about, avatar: user.avatar, email: user.email,
+      });
     } else {
       const errServer = new Error('Пользователь с такой электронной почтой уже зарегистрирован');
       errServer.statusCode = error.ERROR_CONFLICT;
       next(errServer);
     }
-    // res.send({
-    //   _id: user._id, name: user.name, about: user.about, avatar: user.avatar, email: user.email,
-    // });
   } catch (err) {
     if (err.name === 'ValidationError') {
       const errValidationError = new Error('Переданы некорректные данные');
@@ -185,11 +184,11 @@ module.exports.getUserMe = async (req, res, next) => {
   } catch (err) {
     if (err.name === 'CastError') {
       const errCastError = new Error('Переданы некорректные данные');
-      err.statusCode = error.ERROR_BADREQUEST;
+      errCastError.statusCode = error.ERROR_BADREQUEST;
       next(errCastError);
     } else {
       const errGetUsers = new Error('Произошла ошибка на сервере');
-      err.statusCode = error.ERROR_SERVER;
+      errGetUsers.statusCode = error.ERROR_SERVER;
       next(errGetUsers);
     }
   }
