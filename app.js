@@ -3,7 +3,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 const { celebrate, Joi, errors } = require('celebrate');
-const error = require('./utils/errors');
+const NotfoundError = require('./utils/NotfoundError');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -12,7 +12,7 @@ const { userRouters } = require('./routes/user');
 const { cardRouters } = require('./routes/card');
 const { login, createUser } = require('./controllers/user');
 const { auth } = require('./middlewares/auth');
-const { errorHandler } = require('./middlewares/errors');
+const { errorHandler } = require('./middlewares/errorHandler');
 
 app.use(express.json());
 app.post('/signin', celebrate({
@@ -35,9 +35,7 @@ app.use(auth);
 app.use(userRouters);
 app.use(cardRouters);
 app.use((req, res, next) => {
-  const errNotFound = new Error('Произошла ошибка');
-  errNotFound.statusCode = error.ERROR_NOTFOUND;
-  next(errNotFound);
+  next(new NotfoundError('Произошла ошибка'));
 });
 app.use(errors());
 app.use(errorHandler);

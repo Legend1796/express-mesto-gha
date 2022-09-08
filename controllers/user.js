@@ -1,7 +1,11 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const error = require('../utils/errors');
+const UnautorizedError = require('../utils/UnautorizedError');
+const BadreqestError = require('../utils/BadreqestError');
+const ServerError = require('../utils/ServerError');
+const NotfoundError = require('../utils/NotfoundError');
+const ConflictError = require('../utils/ConflictError');
 
 const JWT_SECRET = 'secret';
 
@@ -10,9 +14,7 @@ module.exports.getUsers = async (req, res, next) => {
     const users = await User.find({});
     res.send(users);
   } catch (err) {
-    const errGetUsers = new Error('Произошла ошибка на сервере');
-    errGetUsers.statusCode = error.ERROR_SERVER;
-    next(errGetUsers);
+    next(new ServerError('Произошла ошибка на сервере'));
   }
 };
 
@@ -21,9 +23,7 @@ module.exports.getUser = async (req, res, next) => {
   try {
     const user = await User.findById(userId);
     if (!user) {
-      const errUserNotFound = new Error('Такого пользователся не существует');
-      errUserNotFound.statusCode = error.ERROR_NOTFOUND;
-      next(errUserNotFound);
+      next(new NotfoundError('Такого пользователся не существует'));
     } else {
       res.send({
         _id: user._id, name: user.name, about: user.about, avatar: user.avatar, email: user.email,
@@ -31,13 +31,9 @@ module.exports.getUser = async (req, res, next) => {
     }
   } catch (err) {
     if (err.name === 'CastError') {
-      const errCastError = new Error('Переданы некорректные данные');
-      err.statusCode = error.ERROR_BADREQUEST;
-      next(errCastError);
+      next(new BadreqestError('Переданы некорректные данные'));
     } else {
-      const errGetUser = new Error('Произошла ошибка на сервере');
-      err.statusCode = error.ERROR_SERVER;
-      next(errGetUser);
+      next(new ServerError('Произошла ошибка на сервере'));
     }
   }
 };
@@ -57,17 +53,11 @@ module.exports.createUser = async (req, res, next) => {
     });
   } catch (err) {
     if (err.name === 'ValidationError') {
-      const errValidationError = new Error('Переданы некорректные данные');
-      err.statusCode = error.ERROR_BADREQUEST;
-      next(errValidationError);
+      next(new BadreqestError('Переданы некорректные данные'));
     } else if (err.code === 11000) {
-      const errServer = new Error('Пользователь с такой электронной почтой уже зарегистрирован');
-      errServer.statusCode = error.ERROR_CONFLICT;
-      next(errServer);
+      next(new ConflictError('Пользователь с такой электронной почтой уже зарегистрирован'));
     } else {
-      const errGetUsers = new Error('Произошла ошибка на сервере');
-      err.statusCode = error.ERROR_SERVER;
-      next(errGetUsers);
+      next(new ServerError('Произошла ошибка на сервере'));
     }
   }
 };
@@ -82,9 +72,7 @@ module.exports.updateUser = async (req, res, next) => {
       { new: true, runValidators: true },
     );
     if (!user) {
-      const errUserNotFound = new Error('Такого пользователся не существует');
-      errUserNotFound.statusCode = error.ERROR_NOTFOUND;
-      next(errUserNotFound);
+      next(new NotfoundError('Такого пользователся не существует'));
     } else {
       res.send({
         _id: user._id, name: user.name, about: user.about, avatar: user.avatar, email: user.email,
@@ -92,13 +80,9 @@ module.exports.updateUser = async (req, res, next) => {
     }
   } catch (err) {
     if (err.name === 'ValidationError') {
-      const errValidationError = new Error('Переданы некорректные данные');
-      err.statusCode = error.ERROR_BADREQUEST;
-      next(errValidationError);
+      next(new BadreqestError('Переданы некорректные данные'));
     } else {
-      const errGetUsers = new Error('Произошла ошибка на сервере');
-      err.statusCode = error.ERROR_SERVER;
-      next(errGetUsers);
+      next(new ServerError('Произошла ошибка на сервере'));
     }
   }
 };
@@ -113,21 +97,15 @@ module.exports.updateUserAvatar = async (req, res, next) => {
       { new: true, runValidators: true },
     );
     if (!user) {
-      const errUserNotFound = new Error('Такого пользователся не существует');
-      errUserNotFound.statusCode = error.ERROR_NOTFOUND;
-      next(errUserNotFound);
+      next(new NotfoundError('Такого пользователся не существует'));
     } else {
       res.send(user);
     }
   } catch (err) {
     if (err.errors.name.name === 'ValidatorError') {
-      const errValidationError = new Error('Переданы некорректные данные');
-      err.statusCode = error.ERROR_BADREQUEST;
-      next(errValidationError);
+      next(new BadreqestError('Переданы некорректные данные'));
     } else {
-      const errGetUsers = new Error('Произошла ошибка на сервере');
-      err.statusCode = error.ERROR_SERVER;
-      next(errGetUsers);
+      next(new ServerError('Произошла ошибка на сервере'));
     }
   }
 };
@@ -137,9 +115,7 @@ module.exports.login = async (req, res, next) => {
   try {
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
-      const errAutorization = new Error('Неправильные почта или пароль');
-      errAutorization.statusCode = error.ERROR_UNAUTORIZED;
-      next(errAutorization);
+      next(new UnautorizedError('Неправильные почта или пароль'));
     } else {
       const isUserValid = await bcrypt.compare(password, user.password);
       if (isUserValid) {
@@ -149,15 +125,11 @@ module.exports.login = async (req, res, next) => {
           _id: user._id, name: user.name, about: user.about, avatar: user.avatar, email: user.email,
         });
       } else {
-        const errAutorization = new Error('Неправильные почта или пароль');
-        errAutorization.statusCode = error.ERROR_UNAUTORIZED;
-        next(errAutorization);
+        next(new UnautorizedError('Неправильные почта или пароль'));
       }
     }
   } catch (err) {
-    const errGetUsers = new Error('Произошла ошибка на сервере');
-    err.statusCode = error.ERROR_SERVER;
-    next(errGetUsers);
+    next(new ServerError('Произошла ошибка на сервере'));
   }
 };
 
@@ -166,9 +138,7 @@ module.exports.getUserMe = async (req, res, next) => {
   try {
     const user = await User.findById(userId);
     if (!user) {
-      const errUserNotFound = new Error('Такого пользователся не существует');
-      errUserNotFound.statusCode = error.ERROR_NOTFOUND;
-      next(errUserNotFound);
+      next(new NotfoundError('Такого пользователся не существует'));
     } else {
       res.send({
         _id: user._id, name: user.name, about: user.about, avatar: user.avatar, email: user.email,
@@ -176,13 +146,9 @@ module.exports.getUserMe = async (req, res, next) => {
     }
   } catch (err) {
     if (err.name === 'CastError') {
-      const errCastError = new Error('Переданы некорректные данные');
-      errCastError.statusCode = error.ERROR_BADREQUEST;
-      next(errCastError);
+      next(new BadreqestError('Переданы некорректные данные'));
     } else {
-      const errGetUsers = new Error('Произошла ошибка на сервере');
-      errGetUsers.statusCode = error.ERROR_SERVER;
-      next(errGetUsers);
+      next(new ServerError('Произошла ошибка на сервере'));
     }
   }
 };
