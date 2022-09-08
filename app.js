@@ -3,6 +3,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 const { celebrate, Joi, errors } = require('celebrate');
+const error = require('./utils/errors');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -11,33 +12,35 @@ const { userRouters } = require('./routes/user');
 const { cardRouters } = require('./routes/card');
 const { login, createUser } = require('./controllers/user');
 const { auth } = require('./middlewares/auth');
-const { errorHendler } = require('./middlewares/errors');
+const { errorHandler } = require('./middlewares/errors');
 
 app.use(express.json());
 app.post('/signin', celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
-    password: Joi.string().required().min(8),
+    password: Joi.string().required(),
   }),
 }), login);
 app.post('/signup', celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().min(10).pattern(/^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?#?$/),
+    avatar: Joi.string().pattern(/^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([/\w .-]*)*\/?#?$/),
     email: Joi.string().required().email(),
-    password: Joi.string().required().min(8),
+    password: Joi.string().required(),
   }),
 }), createUser);
 app.use(cookieParser());
 app.use(auth);
 app.use(userRouters);
 app.use(cardRouters);
-app.use((req, res) => {
-  res.status(404).send({ message: 'Произошла ошибка' });
+app.use((req, res, next) => {
+  const errNotFound = new Error('Произошла ошибка');
+  errNotFound.statusCode = error.ERROR_NOTFOUND;
+  next(errNotFound);
 });
 app.use(errors());
-app.use(errorHendler);
+app.use(errorHandler);
 
 async function main() {
   try {

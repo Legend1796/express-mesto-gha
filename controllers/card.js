@@ -37,16 +37,17 @@ module.exports.createCard = async (req, res, next) => {
 module.exports.deleteCard = async (req, res, next) => {
   const { cardId } = req.params;
   try {
-    const card = await Card.findByIdAndRemove(cardId);
+    const card = await Card.findById(cardId);
     if (!card) {
       const errGetCard = new Error('Такой карточки не существует');
       errGetCard.statusCode = error.ERROR_NOTFOUND;
       next(errGetCard);
-    } else if (card.owner !== req.user._id) {
-      const errServer = new Error('У вас нет прав на удаление этой карточки');
-      errServer.statusCode = error.ERROR_SERVER;
-      next(errServer);
+    } else if (card.owner.toString() !== req.user._id) {
+      const errForbidden = new Error('У вас нет прав на удаление этой карточки');
+      errForbidden.statusCode = error.ERROR_FORBIDDEN;
+      next(errForbidden);
     } else {
+      await Card.remove(card);
       res.send(card);
     }
   } catch (err) {

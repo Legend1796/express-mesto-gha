@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const error = require('../utils/errors');
 
-const { JWT_SECRET } = process.env;
+const JWT_SECRET = 'secret';
 
 module.exports.getUsers = async (req, res, next) => {
   try {
@@ -11,7 +11,7 @@ module.exports.getUsers = async (req, res, next) => {
     res.send(users);
   } catch (err) {
     const errGetUsers = new Error('Произошла ошибка на сервере');
-    err.statusCode = error.ERROR_SERVER;
+    errGetUsers.statusCode = error.ERROR_SERVER;
     next(errGetUsers);
   }
 };
@@ -48,25 +48,22 @@ module.exports.createUser = async (req, res, next) => {
   } = req.body;
 
   try {
-    const userEmail = await User.findOne({ email });
-    if (!userEmail) {
-      const hash = await bcrypt.hash(password, 10);
-      const user = await User.create({
-        name, about, avatar, email, password: hash,
-      });
-      res.send({
-        _id: user._id, name: user.name, about: user.about, avatar: user.avatar, email: user.email,
-      });
-    } else {
-      const errServer = new Error('Пользователь с такой электронной почтой уже зарегистрирован');
-      errServer.statusCode = error.ERROR_CONFLICT;
-      next(errServer);
-    }
+    const hash = await bcrypt.hash(password, 10);
+    const user = await User.create({
+      name, about, avatar, email, password: hash,
+    });
+    res.send({
+      _id: user._id, name: user.name, about: user.about, avatar: user.avatar, email: user.email,
+    });
   } catch (err) {
     if (err.name === 'ValidationError') {
       const errValidationError = new Error('Переданы некорректные данные');
       err.statusCode = error.ERROR_BADREQUEST;
       next(errValidationError);
+    } else if (err.code === 11000) {
+      const errServer = new Error('Пользователь с такой электронной почтой уже зарегистрирован');
+      errServer.statusCode = error.ERROR_CONFLICT;
+      next(errServer);
     } else {
       const errGetUsers = new Error('Произошла ошибка на сервере');
       err.statusCode = error.ERROR_SERVER;
@@ -158,15 +155,9 @@ module.exports.login = async (req, res, next) => {
       }
     }
   } catch (err) {
-    if (err.name === 'CastError') {
-      const errCastError = new Error('Переданы некорректные данные');
-      err.statusCode = error.ERROR_BADREQUEST;
-      next(errCastError);
-    } else {
-      const errGetUsers = new Error('Произошла ошибка на сервере');
-      err.statusCode = error.ERROR_SERVER;
-      next(errGetUsers);
-    }
+    const errGetUsers = new Error('Произошла ошибка на сервере');
+    err.statusCode = error.ERROR_SERVER;
+    next(errGetUsers);
   }
 };
 
