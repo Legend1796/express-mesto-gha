@@ -7,14 +7,12 @@ const {
 userRouters.get('/users', getUsers);
 userRouters.get('/users/me', celebrate({
   body: Joi.object().keys({
-    id: Joi.string().max(10),
-    // userId: Joi.string().length(24).hex().required(),
+    userId: Joi.string().length(24).hex().required(),
   }),
 }), getUserMe);
 userRouters.get('/users/:userId', celebrate({
   body: Joi.object().keys({
-    id: Joi.string().max(10),
-    // userId: Joi.string().length(24).hex().required(),
+    userId: Joi.string().length(24).hex().required(),
   }),
 }), getUser);
 userRouters.patch('/users/me', celebrate({

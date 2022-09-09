@@ -152,3 +152,7 @@ module.exports.getUserMe = async (req, res, next) => {
     }
   }
 };
+
+module.exports.logout = (req, res) => {
+  res.clearCookie('jwt').send({ message: 'Вы вышли из аккаунта' });
+};
