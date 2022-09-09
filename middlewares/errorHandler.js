@@ -7,6 +7,6 @@ module.exports.errorHandler = (err, req, res, next) => {
   } else {
     errorMessage = err.message;
   }
-  res.status(statusCode).send({ errorMessage });
+  res.status(statusCode).send({ message: errorMessage });
   next();
 };
