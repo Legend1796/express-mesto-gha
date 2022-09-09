@@ -53,9 +53,10 @@ module.exports.deleteCard = async (req, res, next) => {
 };
 
 module.exports.putLikeCard = async (req, res, next) => {
+  const { cardId } = req.params;
   try {
     const card = await Card.findByIdAndUpdate(
-      req.params.cardId,
+      cardId,
       { $addToSet: { likes: req.user._id } },
       { new: true, runValidators: true },
     );
@@ -74,9 +75,10 @@ module.exports.putLikeCard = async (req, res, next) => {
 };
 
 module.exports.deleteLikeCard = async (req, res, next) => {
+  const { cardId } = req.params;
   try {
     const card = await Card.findByIdAndUpdate(
-      req.params.cardId,
+      cardId,
       { $pull: { likes: req.user._id } },
       { new: true, runValidators: true },
     );
