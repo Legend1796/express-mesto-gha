@@ -6,12 +6,12 @@ const {
 
 userRouters.get('/users', getUsers);
 userRouters.get('/users/me', celebrate({
-  body: Joi.object().keys({
+  params: Joi.object().keys({
     userId: Joi.string().length(24).hex().required(),
   }),
 }), getUserMe);
 userRouters.get('/users/:userId', celebrate({
-  body: Joi.object().keys({
+  params: Joi.object().keys({
     userId: Joi.string().length(24).hex().required(),
   }),
 }), getUser);
