@@ -1,25 +1,20 @@
-[![Tests](https://github.com/Legend1796/express-mesto-gha/actions/workflows/tests-13-sprint.yml/badge.svg)](https://github.com/Legend1796/express-mesto-gha/actions/workflows/tests-13-sprint.yml) [![Tests](https://github.com/Legend1796/express-mesto-gha/actions/workflows/tests-14-sprint.yml/badge.svg)](https://github.com/Legend1796/express-mesto-gha/actions/workflows/tests-14-sprint.yml)
-# Проект Mesto фронтенд + бэкенд
-
-
+# Проект Mesto бэкенд
 
 ## Настройка бейджей статуса тестов
-Перед началом работы над проектом рекомендуется исправить бейджи, отражающие статус прохождения тестов.
-Для этого замените разметку бейджей на следующий фрагмент, подставив вместо `${имя_пользователя}` и `${имя_репозитория}` соответствующие значения.
 
-```
-[![Tests for sprint 13](https://github.com/${имя_пользователя}/${имя репозитория}/actions/workflows/tests-13-sprint.yml/badge.svg)](https://github.com/${имя_пользователя}/${имя репозитория}/actions/workflows/tests-13-sprint.yml) 
+**Функционал**
 
-[![Tests for sprint 14](https://github.com/${имя_пользователя}/${имя репозитория}/actions/workflows/tests-14-sprint.yml/badge.svg)](https://github.com/${имя_пользователя}/${имя репозитория}/actions/workflows/tests-14-sprint.yml)
-```
+1. Gрименяются 5 HTTP-методов: GET, POST, PUT, PATCH, DELETE.
+2. Созданы роуты и описаны перенаправления.
+3. Любой URL, кроме /signup и /signin защищены авторизацией.
+4. Реализована аутентификация пользователя.
+5. Реализована работа с локальным хранилищем и токеном.
 
 ## Директории
 
 `/routes` — папка с файлами роутера  
 `/controllers` — папка с файлами контроллеров пользователя и карточки   
 `/models` — папка с файлами описания схем пользователя и карточки  
-  
-Остальные директории вспомогательные, создаются при необходимости разработчиком
 
 ## Запуск проекта
 
